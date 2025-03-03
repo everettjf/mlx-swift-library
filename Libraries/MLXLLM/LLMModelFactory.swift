@@ -40,6 +40,7 @@ public class ModelTypeRegistry: @unchecked Sendable {
         "cohere": create(CohereConfiguration.self, CohereModel.init),
         "openelm": create(OpenElmConfiguration.self, OpenELMModel.init),
         "internlm2": create(InternLM2Configuration.self, InternLM2Model.init),
+        "deepseekr1": create(DeepSeekR1Configuration.self, DeepSeekR1Model.init),
     ]
 
     /// Add a new model to the type registry.
@@ -96,8 +97,23 @@ public class ModelRegistry: @unchecked Sendable {
         defaultPrompt: "func sortArray(_ array: [Int]) -> String { <FILL_ME> }"
     )
 
+    static public let deepSeekR1_1_5B_4bit = ModelConfiguration(
+        id: "mlx-community/DeepSeek-R1-Distill-Qwen-1.5B-4bit",
+        defaultPrompt: "Is 9.9 greater or 9.11?"
+    )
+
     static public let deepSeekR1_7B_4bit = ModelConfiguration(
         id: "mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit",
+        defaultPrompt: "Is 9.9 greater or 9.11?"
+    )
+
+    static public let deepSeekR1_14B_4bit = ModelConfiguration(
+        id: "mlx-community/DeepSeek-R1-Distill-Qwen-14B-4bit",
+        defaultPrompt: "Is 9.9 greater or 9.11?"
+    )
+
+    static public let deepSeekR1_32B_4bit = ModelConfiguration(
+        id: "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit",
         defaultPrompt: "Is 9.9 greater or 9.11?"
     )
 
@@ -185,10 +201,13 @@ public class ModelRegistry: @unchecked Sendable {
         defaultPrompt: "What is the difference between a fruit and a vegetable?"
     )
 
-    private static func all() -> [ModelConfiguration] {
+    public static func all() -> [ModelConfiguration] {
         [
             codeLlama13b4bit,
+            deepSeekR1_1_5B_4bit,
             deepSeekR1_7B_4bit,
+            deepSeekR1_14B_4bit,
+            deepSeekR1_32B_4bit,
             gemma2bQuantized,
             gemma_2_2b_it_4bit,
             gemma_2_9b_it_4bit,
@@ -282,7 +301,7 @@ public class LLMModelFactory: ModelFactory {
 
     public func _load(
         hub: HubApi, configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void
     ) async throws -> ModelContext {
         // download weights and config
         let modelDirectory = try await downloadModel(

@@ -20,7 +20,7 @@ import Tokenizers
 /// - Returns: URL for the directory containing downloaded files
 public func downloadModel(
     hub: HubApi, configuration: ModelConfiguration,
-    progressHandler: @Sendable @escaping (Progress) -> Void
+    progressHandler: @Sendable @escaping(Progress, String?, Progress?) -> Void
 ) async throws -> URL {
     do {
         switch configuration.id {
@@ -28,7 +28,7 @@ public func downloadModel(
             // download the model weights
             let repo = Hub.Repo(id: id)
             let modelFiles = ["*.safetensors", "*.json"]
-            return try await hub.snapshot(
+            return try await hub.snapshotWithDetailProgress(
                 from: repo, matching: modelFiles, progressHandler: progressHandler)
 
         case .directory(let directory):

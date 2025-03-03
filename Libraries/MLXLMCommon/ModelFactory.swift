@@ -49,12 +49,12 @@ public protocol ModelFactory: Sendable {
 
     func _load(
         hub: HubApi, configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void
     ) async throws -> ModelContext
 
     func _loadContainer(
         hub: HubApi, configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void
     ) async throws -> ModelContainer
 }
 
@@ -67,7 +67,7 @@ extension ModelFactory {
     /// returns a ``ModelContainer``.
     public func load(
         hub: HubApi = HubApi(), configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void = { _ in }
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void = { _,_,_ in }
     ) async throws -> ModelContext {
         try await _load(hub: hub, configuration: configuration, progressHandler: progressHandler)
     }
@@ -75,7 +75,7 @@ extension ModelFactory {
     /// Load a model identified by a ``ModelConfiguration`` and produce a ``ModelContainer``.
     public func loadContainer(
         hub: HubApi = HubApi(), configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void = { _ in }
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void = { _,_,_ in }
     ) async throws -> ModelContainer {
         try await _loadContainer(
             hub: hub, configuration: configuration, progressHandler: progressHandler)
@@ -83,7 +83,7 @@ extension ModelFactory {
 
     public func _loadContainer(
         hub: HubApi = HubApi(), configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void = { _ in }
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void = { _,_,_ in }
     ) async throws -> ModelContainer {
         let context = try await _load(
             hub: hub, configuration: configuration, progressHandler: progressHandler)

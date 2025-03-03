@@ -216,7 +216,7 @@ public class VLMModelFactory: ModelFactory {
 
     public func _load(
         hub: HubApi, configuration: ModelConfiguration,
-        progressHandler: @Sendable @escaping (Progress) -> Void
+        progressHandler: @Sendable @escaping (Progress, String?, Progress?) -> Void
     ) async throws -> ModelContext {
         // download weights and config
         let modelDirectory = try await downloadModel(
