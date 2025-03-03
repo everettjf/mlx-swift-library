@@ -29,7 +29,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/ml-explore/mlx-swift", .upToNextMinor(from: "0.21.2")),
         .package(
-            url: "https://github.com/huggingface/swift-transformers", .upToNextMinor(from: "0.1.17")
+//            url: "https://github.com/huggingface/swift-transformers", .upToNextMinor(from: "0.1.17")
+            path: "../swift-transformers"
         ),
         .package(
             url: "https://github.com/apple/swift-async-algorithms", .upToNextMinor(from: "1.0.0")),
