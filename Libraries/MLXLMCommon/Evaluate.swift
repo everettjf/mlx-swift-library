@@ -554,3 +554,66 @@ public func generate(
         output: context.tokenizer.decode(tokens: tokens),
         promptTime: promptTime, generateTime: generateTime)
 }
+
+
+
+public func generateTokenByToken(
+    input: LMInput, parameters: GenerateParameters, context: ModelContext,
+    didGenerateOneToken: (Int,[Int]) -> GenerateDisposition
+) throws -> GenerateResult {
+    let iterator = try TokenIterator(
+        input: input, model: context.model, parameters: parameters)
+    return generateTokenByToken(
+        input: input, context: context, iterator: iterator, didGenerateOneToken: didGenerateOneToken)
+}
+public func generateTokenByToken(
+    input: LMInput, context: ModelContext,
+    iterator: TokenIterator,
+    didGenerateOneToken: (Int,[Int]) -> GenerateDisposition
+) -> GenerateResult {
+    var start = Date.timeIntervalSinceReferenceDate
+    var promptTime: TimeInterval = 0
+
+    let additionalEOSTokenIds = Set(
+        (context.configuration.extraEOSTokens ?? [])
+            .compactMap {
+                context.tokenizer.convertTokenToId($0)
+            })
+
+    var tokens = [Int]()
+
+    for token in iterator {
+        // compute the timing for the prompt
+        if tokens.isEmpty {
+            let now = Date.timeIntervalSinceReferenceDate
+            promptTime = now - start
+            start = now
+        }
+
+        if token == context.tokenizer.unknownTokenId || token == context.tokenizer.eosTokenId
+            || additionalEOSTokenIds.contains(token)
+        {
+            break
+        }
+        tokens.append(token)
+
+        if didGenerateOneToken(token, tokens) == .stop {
+            break
+        }
+    }
+
+    let now = Date.timeIntervalSinceReferenceDate
+    let generateTime = now - start
+
+    // TokenIterator uses `asyncEval()` to keep the pipeline full.  If the caller
+    // exits the program right away, those tasks will still be executing and will
+    // hit assertions as the mlx scheduler is torn down.  Synchronize with the stream
+    // to make sure it is complete.
+    Stream().synchronize()
+
+    return GenerateResult(
+        inputText: input.text, tokens: tokens,
+        output: context.tokenizer.decode(tokens: tokens),
+        promptTime: promptTime, generateTime: generateTime)
+}
+
